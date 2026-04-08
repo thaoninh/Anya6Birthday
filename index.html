@@ -356,12 +356,16 @@
   /* Footer note */
   .footer-note {
     font-size: 11px;
-    color: rgba(147,112,204,0.85);
+    color: #fde68a;
     text-align: center;
     line-height: 1.6;
     margin-bottom: 12px;
     z-index: 15;
     position: relative;
+    text-shadow: 0 0 8px rgba(13,2,37,0.9), 0 0 16px rgba(13,2,37,0.7), 0 1px 3px rgba(0,0,0,0.8);
+    background: rgba(13,2,37,0.6);
+    border-radius: 12px;
+    padding: 12px 16px;
   }
 
   .sparkle-row {
@@ -386,6 +390,118 @@
     10%  { opacity: 1; }
     90%  { opacity: 0.6; }
     100% { transform: translateY(-120px) scale(0.3); opacity: 0; }
+  }
+
+  /* RSVP Form */
+  .rsvp-form-section {
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: 16px;
+  }
+
+  .rsvp-form-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: #f5c842;
+    text-shadow: 0 0 16px rgba(245,200,66,0.4);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .rsvp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-label {
+    font-size: 10px;
+    color: #c084fc;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+  }
+
+  .form-input {
+    background: rgba(162,89,247,0.1);
+    border: 1.5px solid rgba(162,89,247,0.35);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fde68a;
+    font-family: 'Nunito', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-input::placeholder {
+    color: rgba(253,230,138,0.35);
+    font-weight: 400;
+  }
+
+  .form-input:focus {
+    border-color: #f5c842;
+    box-shadow: 0 0 12px rgba(245,200,66,0.2);
+  }
+
+  .form-input option {
+    background: #1a0533;
+    color: #fde68a;
+  }
+
+  .form-submit {
+    background: linear-gradient(90deg, #a259f7, #f472b6, #f5c842);
+    color: #1a0533;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-top: 4px;
+  }
+
+  .form-submit:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+
+  .form-submit:active {
+    transform: scale(0.98);
+  }
+
+  .form-success {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #a3e635;
+    background: rgba(163,230,53,0.1);
+    border: 1.5px solid rgba(163,230,53,0.35);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+
+  .form-error {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #f87171;
+    background: rgba(248,113,113,0.1);
+    border: 1.5px solid rgba(248,113,113,0.35);
+    border-radius: 12px;
+    padding: 12px 16px;
   }
 </style>
 </head>
@@ -486,6 +602,67 @@
       </div>
     </div>
 
+    <!-- RSVP Form -->
+    <div class="rsvp-form-section">
+      <div class="divider" style="margin-top: 8px;">
+        <div class="divider-line"></div>
+        <div class="divider-gem"></div>
+        <div class="divider-line"></div>
+      </div>
+      <div class="rsvp-form-title">RSVP Here!</div>
+      <form name="rsvp" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="rsvp-form" id="rsvp-form">
+        <input type="hidden" name="form-name" value="rsvp" />
+        <p style="display:none"><label>Don't fill this: <input name="bot-field" /></label></p>
+
+        <div class="form-group">
+          <label class="form-label" for="guest-name">Your Name</label>
+          <input class="form-input" type="text" id="guest-name" name="name" placeholder="Parent / Guardian name" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="child-name">Child's Name</label>
+          <input class="form-input" type="text" id="child-name" name="child_name" placeholder="Child's name" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-input" type="email" id="email" name="email" placeholder="your@email.com" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="adults">Number of Adults</label>
+          <input class="form-input" type="number" id="adults" name="adults" min="1" max="10" value="1" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="kids">Number of Kids</label>
+          <input class="form-input" type="number" id="kids" name="kids" min="0" max="10" value="1" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="attendance">Will You Attend?</label>
+          <select class="form-input" id="attendance" name="attendance" required>
+            <option value="">— Select —</option>
+            <option value="yes">Yes, we'll be there! ⚔️</option>
+            <option value="no">Sorry, can't make it 💔</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="message">Message for Anya (optional)</label>
+          <textarea class="form-input" id="message" name="message" rows="3" placeholder="Happy Birthday, Anya!"></textarea>
+        </div>
+
+        <button type="submit" class="form-submit" id="rsvp-submit">Send RSVP ✨</button>
+        <div class="form-success" id="rsvp-success" style="display:none;">
+          Thank you! Your RSVP has been received. See you at the party! 🎉⚔️
+        </div>
+        <div class="form-error" id="rsvp-error" style="display:none;">
+          Oops, something went wrong. Please try again or contact us directly.
+        </div>
+      </form>
+    </div>
+
     <!-- Spacer so footer sits above characters -->
     <div class="character-spacer"></div>
 
@@ -568,6 +745,42 @@
     requestAnimationFrame(animate);
   }
   animate();
+})();
+
+/* RSVP Form AJAX Submission */
+(function() {
+  const form = document.getElementById('rsvp-form');
+  const submitBtn = document.getElementById('rsvp-submit');
+  const successMsg = document.getElementById('rsvp-success');
+  const errorMsg = document.getElementById('rsvp-error');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    successMsg.style.display = 'none';
+    errorMsg.style.display = 'none';
+
+    try {
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(new FormData(form)).toString()
+      });
+
+      if (response.ok) {
+        successMsg.style.display = 'block';
+        form.reset();
+      } else {
+        errorMsg.style.display = 'block';
+      }
+    } catch (err) {
+      errorMsg.style.display = 'block';
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Send RSVP ✨';
+  });
 })();
 </script>
 
