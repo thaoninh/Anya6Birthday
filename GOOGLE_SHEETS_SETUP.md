@@ -60,6 +60,9 @@ function doPost(e) {
     sheet.appendRow(rowData);
     console.log('Row saved successfully');
     
+    // Send email notification
+    sendEmailNotification(params);
+    
     // Return success
     var output = ContentService.createTextOutput(JSON.stringify({
       'success': true,
@@ -86,6 +89,43 @@ function doGet(e) {
   }));
   output.setMimeType(ContentService.MimeType.JSON);
   return output;
+}
+
+// Send email notification for new RSVP
+function sendEmailNotification(params) {
+  try {
+    // YOUR EMAIL ADDRESS - Change this if needed
+    const yourEmail = Session.getActiveUser().getEmail();
+    
+    if (!yourEmail) {
+      console.log('Could not get user email - skipping notification');
+      return;
+    }
+    
+    const subject = params.attendance === 'Yes' 
+      ? '🎉 New RSVP: ' + params.guestName + ' is coming!'
+      : '💔 New RSVP: ' + params.guestName + ' cannot attend';
+    
+    let body = 'NEW RSVP SUBMITTED\n\n';
+    body += 'Attendance: ' + (params.attendance || 'N/A') + '\n';
+    body += 'Guest: ' + (params.guestName || 'N/A') + '\n';
+    body += 'Child: ' + (params.childName || 'N/A') + '\n';
+    body += 'Email: ' + (params.email || 'N/A') + '\n';
+    body += 'Phone: ' + (params.phone || 'N/A') + '\n';
+    body += 'Adults: ' + (params.adults || 0) + '\n';
+    body += 'Kids: ' + (params.kids || 0) + '\n';
+    body += 'Dietary: ' + (params.dietary || 'None') + '\n';
+    body += 'Message: ' + (params.message || 'None') + '\n\n';
+    body += 'Submitted at: ' + new Date().toLocaleString();
+    
+    // Send the email
+    GmailApp.sendEmail(yourEmail, subject, body);
+    console.log('Email notification sent to: ' + yourEmail);
+    
+  } catch (error) {
+    console.error('Failed to send email notification:', error);
+    // Don't fail the form submission if email fails
+  }
 }
 ```
 
@@ -141,6 +181,50 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzxxxxxxxx/ex
 - The Google Apps Script is publicly accessible (required for form submissions)
 - Only you can edit the script and view the spreadsheet
 - Consider adding form validation in the Apps Script if needed
+
+## Email Notifications (Built-in)
+
+**Good news:** Email notifications are already included in the script above! The `sendEmailNotification` function will automatically send you an email every time someone RSVPs.
+
+### How It Works:
+- The script automatically detects your Gmail address
+- Sends an email with all RSVP details
+- Works immediately - no additional setup needed
+
+### To Enable:
+1. The code above already includes email notifications (line 64 calls `sendEmailNotification`)
+2. Just make sure to **create a new deployment** after any code changes
+3. When you first deploy, Google will ask for permission to send emails - click **Allow**
+
+### Email Format:
+You'll receive emails like:
+```
+Subject: 🎉 New RSVP: John Smith is coming!
+
+NEW RSVP SUBMITTED
+
+Attendance: Yes
+Guest: John Smith
+Child: Emily Smith
+Email: john@email.com
+Phone: (555) 123-4567
+Adults: 2
+Kids: 1
+Dietary: None
+Message: Can't wait!
+
+Submitted at: 4/9/2026, 11:30:00 AM
+```
+
+### Note About Google Sheets Notifications:
+The built-in **Tools → Notification rules** feature in Google Sheets only works with Google Forms, not with Apps Script. That's why we added email notifications directly in the script code instead.
+
+### Troubleshooting:
+**Not receiving emails?**
+- Check your spam/junk folder
+- Make sure you authorized the script to send emails when deploying
+- Check the Apps Script execution logs (View → Executions)
+- The script sends to the account that owns the Google Sheet
 - The script logs all submissions with timestamps
 
 ## Benefits vs Netlify Forms
