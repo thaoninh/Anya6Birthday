@@ -95,7 +95,7 @@ function doGet(e) {
 function sendEmailNotification(params) {
   try {
     // YOUR EMAIL ADDRESS - Change this if needed
-    const yourEmail = Session.getActiveUser().getEmail();
+    const yourEmail = 'thaoninh.email@gmail.com';
     
     if (!yourEmail) {
       console.log('Could not get user email - skipping notification');
