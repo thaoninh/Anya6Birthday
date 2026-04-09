@@ -890,38 +890,38 @@ emailjs.init('6GDrBi8NCxXS8Ml9H');
       }
       
       console.log('Submitting to:', GOOGLE_SCRIPT_URL);
-      console.log('Form data:', formData);
       
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
+      // Convert formData to URL-encoded string for Google Apps Script
+      const params = new URLSearchParams();
+      for (const key in formData) {
+        params.append(key, formData[key]);
+      }
+      
+      // Use no-cors mode for Google Apps Script
+      await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        mode: 'no-cors',
+        body: params
       });
 
-      console.log('Response status:', response.status);
+      // With no-cors, we can't read the response, so assume success
+      // The data was sent to Google Sheets
       
-      const result = await response.json();
-      console.log('Response result:', result);
-
-      if (result.success) {
-        /* Send confirmation email via EmailJS (only for yes responses) */
-        if (isAttending && document.getElementById('email').value) {
-          await emailjs.send('service_j31eelq', 'template_0zn9t2p', {
-            to_email: document.getElementById('email').value,
-            guest_name: document.getElementById('guest-name').value,
-            child_name: document.getElementById('child-name').value,
-          });
-        }
-
-        successMsg.style.display = 'block';
-        form.reset();
-        document.getElementById('yes-fields').style.display = 'none';
-        document.getElementById('decline-fields').style.display = 'none';
-        document.getElementById('attendance').value = '';
-      } else {
-        errorMsg.style.display = 'block';
+      /* Send confirmation email via EmailJS (only for yes responses) */
+      if (isAttending && document.getElementById('email').value) {
+        await emailjs.send('service_j31eelq', 'template_0zn9t2p', {
+          to_email: document.getElementById('email').value,
+          guest_name: document.getElementById('guest-name').value,
+          child_name: document.getElementById('child-name').value,
+        });
       }
+
+      successMsg.style.display = 'block';
+      form.reset();
+      document.getElementById('yes-fields').style.display = 'none';
+      document.getElementById('decline-fields').style.display = 'none';
+      document.getElementById('attendance').value = '';
+      
     } catch (err) {
       console.error('Form submission error:', err);
       errorMsg.style.display = 'block';

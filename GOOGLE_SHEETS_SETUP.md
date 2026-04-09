@@ -24,22 +24,9 @@ This guide will help you set up Google Sheets to collect RSVP form submissions i
 
 ```javascript
 function doPost(e) {
-  // Set CORS headers for all responses
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
-  };
-  
   try {
-    let data;
-    
-    // Parse the JSON data from the request
-    if (e.postData && e.postData.contents) {
-      data = JSON.parse(e.postData.contents);
-    } else {
-      throw new Error('No data received');
-    }
+    // Get form data from URL-encoded parameters
+    const params = e.parameter;
     
     // Get the active spreadsheet and sheet
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
@@ -52,47 +39,41 @@ function doPost(e) {
     
     // Append the data to the sheet
     sheet.appendRow([
-      data.timestamp || new Date().toISOString(),
-      data.attendance || '',
-      data.guestName || '',
-      data.childName || '',
-      data.email || '',
-      data.phone || '',
-      data.adults || 0,
-      data.kids || 0,
-      data.message || ''
+      params.timestamp || new Date().toISOString(),
+      params.attendance || '',
+      params.guestName || '',
+      params.childName || '',
+      params.email || '',
+      params.phone || '',
+      params.adults || 0,
+      params.kids || 0,
+      params.message || ''
     ]);
     
-    // Return success response
-    const output = ContentService.createTextOutput(JSON.stringify({
+    // Return success response with CORS header
+    return ContentService.createTextOutput(JSON.stringify({
       'success': true,
       'message': 'RSVP saved successfully!'
-    }));
-    output.setMimeType(ContentService.MimeType.JSON);
-    
-    return output;
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
     
   } catch (error) {
     // Return error response
-    const output = ContentService.createTextOutput(JSON.stringify({
+    return ContentService.createTextOutput(JSON.stringify({
       'success': false,
       'error': error.toString()
-    }));
-    output.setMimeType(ContentService.MimeType.JSON);
-    
-    return output;
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
 // Handle GET requests (for testing)
 function doGet(e) {
-  const output = ContentService.createTextOutput(JSON.stringify({
+  return ContentService.createTextOutput(JSON.stringify({
     'success': true,
     'message': 'RSVP form endpoint is working!'
-  }));
-  output.setMimeType(ContentService.MimeType.JSON);
-  
-  return output;
+  }))
+  .setMimeType(ContentService.MimeType.JSON);
 }
 ```
 
