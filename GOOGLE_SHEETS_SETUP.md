@@ -24,67 +24,75 @@ This guide will help you set up Google Sheets to collect RSVP form submissions i
 
 ```javascript
 function doPost(e) {
-  // Handle CORS preflight
-  if (e.parameter.method === 'OPTIONS') {
-    return ContentService.createTextOutput(JSON.stringify({'success': true}))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
-  }
+  // Set CORS headers for all responses
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  };
   
   try {
-    // Parse the JSON data
-    const data = JSON.parse(e.postData.contents);
+    let data;
     
-    // Get the active spreadsheet
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    // Parse the JSON data from the request
+    if (e.postData && e.postData.contents) {
+      data = JSON.parse(e.postData.contents);
+    } else {
+      throw new Error('No data received');
+    }
+    
+    // Get the active spreadsheet and sheet
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = spreadsheet.getActiveSheet();
+    
+    // If sheet is empty, add headers
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(['Timestamp', 'Attendance', 'Guest Name', 'Child Name', 'Email', 'Phone', 'Adults', 'Kids', 'Message']);
+    }
     
     // Append the data to the sheet
     sheet.appendRow([
-      data.timestamp,
-      data.attendance,
-      data.guestName,
-      data.childName,
-      data.email,
-      data.phone,
-      data.adults,
-      data.kids,
-      data.message
+      data.timestamp || new Date().toISOString(),
+      data.attendance || '',
+      data.guestName || '',
+      data.childName || '',
+      data.email || '',
+      data.phone || '',
+      data.adults || 0,
+      data.kids || 0,
+      data.message || ''
     ]);
     
-    // Return success response with CORS headers
-    return ContentService.createTextOutput(JSON.stringify({
+    // Return success response
+    const output = ContentService.createTextOutput(JSON.stringify({
       'success': true,
       'message': 'RSVP saved successfully!'
-    })).setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({
-        'Access-Control-Allow-Origin': '*'
-      });
-      
+    }));
+    output.setMimeType(ContentService.MimeType.JSON);
+    
+    return output;
+    
   } catch (error) {
-    // Return error response with CORS headers
-    return ContentService.createTextOutput(JSON.stringify({
+    // Return error response
+    const output = ContentService.createTextOutput(JSON.stringify({
       'success': false,
       'error': error.toString()
-    })).setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({
-        'Access-Control-Allow-Origin': '*'
-      });
+    }));
+    output.setMimeType(ContentService.MimeType.JSON);
+    
+    return output;
   }
 }
 
 // Handle GET requests (for testing)
 function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({
+  const output = ContentService.createTextOutput(JSON.stringify({
     'success': true,
     'message': 'RSVP form endpoint is working!'
-  })).setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*'
-    });
+  }));
+  output.setMimeType(ContentService.MimeType.JSON);
+  
+  return output;
 }
 ```
 
