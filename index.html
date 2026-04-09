@@ -784,7 +784,7 @@
 })();
 
 /* EmailJS init — replace YOUR_PUBLIC_KEY with your actual key */
-emailjs.init('YOUR_PUBLIC_KEY');
+emailjs.init('6GDrBi8NCxXS8Ml9H');
 
 /* RSVP Form AJAX Submission */
 (function() {
@@ -811,7 +811,7 @@ emailjs.init('YOUR_PUBLIC_KEY');
       if (response.ok) {
         /* Send confirmation email via EmailJS */
         /* Replace YOUR_SERVICE_ID and YOUR_TEMPLATE_ID with actual values */
-        await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+        await emailjs.send('service_j31eelq', 'template_0zn9t2p', {
           to_email: document.getElementById('email').value,
           guest_name: document.getElementById('guest-name').value,
           child_name: document.getElementById('child-name').value,

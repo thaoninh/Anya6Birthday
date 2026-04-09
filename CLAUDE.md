@@ -26,7 +26,7 @@ The site uses EmailJS to send confirmation emails from the browser when a guest 
 
 1. Sign up at https://www.emailjs.com (free tier = 200 emails/month)
 2. Go to **Email Services** > **Add New Service** > choose **Gmail** and connect your Gmail account
-3. Note your **Service ID** (e.g. `service_abc123`)
+3. Note your **Service ID** (e.g. `service_abc123`) // service_j31eelq
 4. Go to **Email Templates** > **Create New Template** and set up:
    - **To Email**: `{{to_email}}`
    - **Subject**: `You're coming to Anya's Birthday! 🎉⚔️`
@@ -44,8 +44,8 @@ The site uses EmailJS to send confirmation emails from the browser when a guest 
 
      — The Salian Family 💜
      ```
-   - Note your **Template ID** (e.g. `template_xyz789`)
-5. Go to **Account** > copy your **Public Key**
+   - Note your **Template ID** (e.g. `template_xyz789`) // template_0zn9t2p
+5. Go to **Account** > copy your **Public Key** // 6GDrBi8NCxXS8Ml9H
 6. In `index.html`, replace the three placeholders:
    - `YOUR_PUBLIC_KEY` — your EmailJS public key
    - `YOUR_SERVICE_ID` — your EmailJS service ID
