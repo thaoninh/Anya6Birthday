@@ -651,9 +651,7 @@
         <div class="divider-line"></div>
       </div>
       <div class="rsvp-form-title">RSVP Here!</div>
-      <form name="rsvp" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="rsvp-form" id="rsvp-form">
-        <input type="hidden" name="form-name" value="rsvp" />
-        <p style="display:none"><label>Don't fill this: <input name="bot-field" /></label></p>
+      <form name="rsvp" class="rsvp-form" id="rsvp-form">
 
         <div class="form-group">
           <label class="form-label" for="attendance">Will You Attend?</label>
@@ -664,10 +662,15 @@
           </select>
         </div>
 
-        <div id="decline-message" style="display:none;">
-          <div class="form-success" style="color:#f0abfc; background:rgba(240,171,252,0.1); border-color:rgba(240,171,252,0.35);">
+        <div id="decline-fields" style="display:none;">
+          <div class="form-success" style="color:#f0abfc; background:rgba(240,171,252,0.1); border-color:rgba(240,171,252,0.35); margin-bottom: 12px;">
             We'll miss you at the party! Thank you for letting us know. 💜
           </div>
+          <div class="form-group">
+            <label class="form-label" for="decline-name">Your Name (Optional)</label>
+            <input class="form-input" type="text" id="decline-name" name="decline_name" placeholder="Your name" />
+          </div>
+          <button type="submit" class="form-submit" id="rsvp-submit-decline">Send RSVP ✨</button>
         </div>
 
         <div id="yes-fields" style="display:none;">
@@ -684,6 +687,11 @@
           <div class="form-group">
             <label class="form-label" for="email">Email</label>
             <input class="form-input" type="email" id="email" name="email" placeholder="your@email.com" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="phone">Phone Number (Optional)</label>
+            <input class="form-input" type="tel" id="phone" name="phone" placeholder="(555) 123-4567" />
           </div>
 
           <div class="form-group">
@@ -801,7 +809,7 @@
 (function() {
   const attendance = document.getElementById('attendance');
   const yesFields = document.getElementById('yes-fields');
-  const declineMsg = document.getElementById('decline-message');
+  const declineFields = document.getElementById('decline-fields');
   const requiredInputs = yesFields.querySelectorAll('input[type="text"], input[type="email"]');
 
   attendance.addEventListener('change', function() {
@@ -809,15 +817,17 @@
       yesFields.style.display = 'flex';
       yesFields.style.flexDirection = 'column';
       yesFields.style.gap = '12px';
-      declineMsg.style.display = 'none';
+      declineFields.style.display = 'none';
       requiredInputs.forEach(input => input.required = true);
     } else if (this.value === 'no') {
       yesFields.style.display = 'none';
-      declineMsg.style.display = 'block';
+      declineFields.style.display = 'flex';
+      declineFields.style.flexDirection = 'column';
+      declineFields.style.gap = '12px';
       requiredInputs.forEach(input => input.required = false);
     } else {
       yesFields.style.display = 'none';
-      declineMsg.style.display = 'none';
+      declineFields.style.display = 'none';
       requiredInputs.forEach(input => input.required = false);
     }
   });
@@ -829,38 +839,79 @@ emailjs.init('6GDrBi8NCxXS8Ml9H');
 /* RSVP Form AJAX Submission */
 (function() {
   const form = document.getElementById('rsvp-form');
-  const submitBtn = document.getElementById('rsvp-submit');
+  const submitBtnYes = document.getElementById('rsvp-submit');
+  const submitBtnNo = document.getElementById('rsvp-submit-decline');
   const successMsg = document.getElementById('rsvp-success');
   const errorMsg = document.getElementById('rsvp-error');
 
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
+    
+    const attendance = document.getElementById('attendance').value;
+    const isAttending = attendance === 'yes';
+    const submitBtn = isAttending ? submitBtnYes : submitBtnNo;
+    
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending...';
     successMsg.style.display = 'none';
     errorMsg.style.display = 'none';
 
     try {
-      /* Submit to Netlify Forms */
-      const response = await fetch('/', {
+      /* Submit to Google Sheets via Google Apps Script */
+      /* Replace with your Google Apps Script Web App URL */
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxc_Jx1yI0EO-QAHJPAyYmzQPOrS6-yrj3Kpp5kJbhfikGIDPwOzFyKMRAhdPcie_5A/exec';
+      
+      let formData;
+      
+      if (isAttending) {
+        formData = {
+          timestamp: new Date().toISOString(),
+          attendance: 'Yes',
+          guestName: document.getElementById('guest-name').value,
+          childName: document.getElementById('child-name').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value,
+          adults: document.getElementById('adults').value,
+          kids: document.getElementById('kids').value,
+          message: document.getElementById('message').value
+        };
+      } else {
+        formData = {
+          timestamp: new Date().toISOString(),
+          attendance: 'No',
+          guestName: document.getElementById('decline-name').value,
+          childName: '',
+          email: '',
+          phone: '',
+          adults: 0,
+          kids: 0,
+          message: 'Cannot attend'
+        };
+      }
+      
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(new FormData(form)).toString()
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
       });
 
-      if (response.ok) {
-        /* Send confirmation email via EmailJS */
-        /* Replace YOUR_SERVICE_ID and YOUR_TEMPLATE_ID with actual values */
-        await emailjs.send('service_j31eelq', 'template_0zn9t2p', {
-          to_email: document.getElementById('email').value,
-          guest_name: document.getElementById('guest-name').value,
-          child_name: document.getElementById('child-name').value,
-        });
+      const result = await response.json();
+
+      if (result.success) {
+        /* Send confirmation email via EmailJS (only for yes responses) */
+        if (isAttending && document.getElementById('email').value) {
+          await emailjs.send('service_j31eelq', 'template_0zn9t2p', {
+            to_email: document.getElementById('email').value,
+            guest_name: document.getElementById('guest-name').value,
+            child_name: document.getElementById('child-name').value,
+          });
+        }
 
         successMsg.style.display = 'block';
         form.reset();
         document.getElementById('yes-fields').style.display = 'none';
-        document.getElementById('decline-message').style.display = 'none';
+        document.getElementById('decline-fields').style.display = 'none';
+        document.getElementById('attendance').value = '';
       } else {
         errorMsg.style.display = 'block';
       }
