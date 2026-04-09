@@ -691,7 +691,7 @@
 
           <div class="form-group">
             <label class="form-label" for="phone">Phone Number (Optional)</label>
-            <input class="form-input" type="tel" id="phone" name="phone" placeholder="(555) 123-4567" />
+            <input class="form-input" type="tel" id="phone" name="phone" placeholder="(555) 123-4567" pattern="[0-9\(\)\-\+\s\.]{10,}" title="Please enter a valid phone number (at least 10 digits)" />
           </div>
 
           <div class="form-group">
@@ -702,6 +702,11 @@
           <div class="form-group">
             <label class="form-label" for="kids">Number of Kids</label>
             <input class="form-input" type="number" id="kids" name="kids" min="0" max="10" value="1" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="dietary">Dietary Restrictions (Optional)</label>
+            <input class="form-input" type="text" id="dietary" name="dietary" placeholder="Allergies, vegetarian, etc." />
           </div>
 
           <div class="form-group">
@@ -864,7 +869,7 @@ emailjs.init('6GDrBi8NCxXS8Ml9H');
     try {
       /* Submit to Google Sheets via Google Apps Script */
       /* Replace with your Google Apps Script Web App URL */
-      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyIO8CtOB7jO7rsUT_wMErPGex1yRpfPC6Uc2pwI2taUT_Eww7uwWYmuxgXe7qPl9Xo/exec';
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyeGGVzP_lqFv2RoUIDGGz7JdmxxoEShnXp18t5GCYB5MyewsEnSqNJXETWbtwiw78Y/exec';
       
       let formData;
       
@@ -878,6 +883,7 @@ emailjs.init('6GDrBi8NCxXS8Ml9H');
           phone: document.getElementById('phone').value,
           adults: document.getElementById('adults').value,
           kids: document.getElementById('kids').value,
+          dietary: document.getElementById('dietary').value,
           message: document.getElementById('message').value
         };
       } else {

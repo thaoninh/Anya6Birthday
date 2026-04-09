@@ -15,7 +15,8 @@ This guide will help you set up Google Sheets to collect RSVP form submissions i
    - F: Phone
    - G: Adults
    - H: Kids
-   - I: Message
+   - I: Dietary
+   - J: Message
 
 ## Step 2: Create Google Apps Script
 
@@ -38,7 +39,7 @@ function doPost(e) {
     
     // Add headers if first row
     if (sheet.getLastRow() === 0) {
-      sheet.appendRow(['Timestamp', 'Attendance', 'Guest Name', 'Child Name', 'Email', 'Phone', 'Adults', 'Kids', 'Message']);
+      sheet.appendRow(['Timestamp', 'Attendance', 'Guest Name', 'Child Name', 'Email', 'Phone', 'Adults', 'Kids', 'Dietary', 'Message']);
     }
     
     // Append the data
@@ -51,6 +52,7 @@ function doPost(e) {
       params.phone || '',
       params.adults || 0,
       params.kids || 0,
+      params.dietary || '',
       params.message || ''
     ];
     
