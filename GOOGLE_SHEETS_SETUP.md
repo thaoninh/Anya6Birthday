@@ -25,20 +25,24 @@ This guide will help you set up Google Sheets to collect RSVP form submissions i
 ```javascript
 function doPost(e) {
   try {
+    // Log what we received for debugging
+    console.log('Received data:', e);
+    console.log('Parameters:', e.parameter);
+    
     // Get form data from URL-encoded parameters
     const params = e.parameter;
     
-    // Get the active spreadsheet and sheet
+    // Get the active spreadsheet
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = spreadsheet.getActiveSheet();
+    const sheet = spreadsheet.getActiveSheet();
     
-    // If sheet is empty, add headers
+    // Add headers if first row
     if (sheet.getLastRow() === 0) {
       sheet.appendRow(['Timestamp', 'Attendance', 'Guest Name', 'Child Name', 'Email', 'Phone', 'Adults', 'Kids', 'Message']);
     }
     
-    // Append the data to the sheet
-    sheet.appendRow([
+    // Append the data
+    const rowData = [
       params.timestamp || new Date().toISOString(),
       params.attendance || '',
       params.guestName || '',
@@ -48,32 +52,38 @@ function doPost(e) {
       params.adults || 0,
       params.kids || 0,
       params.message || ''
-    ]);
+    ];
     
-    // Return success response with CORS header
-    return ContentService.createTextOutput(JSON.stringify({
+    console.log('Saving row:', rowData);
+    sheet.appendRow(rowData);
+    console.log('Row saved successfully');
+    
+    // Return success
+    var output = ContentService.createTextOutput(JSON.stringify({
       'success': true,
-      'message': 'RSVP saved successfully!'
-    }))
-    .setMimeType(ContentService.MimeType.JSON);
+      'message': 'RSVP saved!'
+    }));
+    output.setMimeType(ContentService.MimeType.JSON);
+    return output;
     
   } catch (error) {
-    // Return error response
-    return ContentService.createTextOutput(JSON.stringify({
+    console.error('Error:', error);
+    var output = ContentService.createTextOutput(JSON.stringify({
       'success': false,
       'error': error.toString()
-    }))
-    .setMimeType(ContentService.MimeType.JSON);
+    }));
+    output.setMimeType(ContentService.MimeType.JSON);
+    return output;
   }
 }
 
-// Handle GET requests (for testing)
 function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({
+  var output = ContentService.createTextOutput(JSON.stringify({
     'success': true,
-    'message': 'RSVP form endpoint is working!'
-  }))
-  .setMimeType(ContentService.MimeType.JSON);
+    'message': 'Working!'
+  }));
+  output.setMimeType(ContentService.MimeType.JSON);
+  return output;
 }
 ```
 

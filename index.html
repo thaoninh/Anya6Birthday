@@ -712,8 +712,11 @@
           <button type="submit" class="form-submit" id="rsvp-submit">Send RSVP ✨</button>
         </div>
 
-        <div class="form-success" id="rsvp-success" style="display:none;">
+        <div class="form-success" id="rsvp-success-yes" style="display:none;">
           Thank you! Your RSVP has been received. See you at the party! 🎉⚔️
+        </div>
+        <div class="form-success" id="rsvp-success-no" style="display:none; color:#f0abfc; background:rgba(240,171,252,0.1); border-color:rgba(240,171,252,0.35);">
+          Thank you for letting us know! We'll miss you at the party. 💜
         </div>
         <div class="form-error" id="rsvp-error" style="display:none;">
           Oops, something went wrong. Please try again or contact us directly.
@@ -841,7 +844,8 @@ emailjs.init('6GDrBi8NCxXS8Ml9H');
   const form = document.getElementById('rsvp-form');
   const submitBtnYes = document.getElementById('rsvp-submit');
   const submitBtnNo = document.getElementById('rsvp-submit-decline');
-  const successMsg = document.getElementById('rsvp-success');
+  const successMsgYes = document.getElementById('rsvp-success-yes');
+  const successMsgNo = document.getElementById('rsvp-success-no');
   const errorMsg = document.getElementById('rsvp-error');
 
   form.addEventListener('submit', async function(e) {
@@ -853,7 +857,8 @@ emailjs.init('6GDrBi8NCxXS8Ml9H');
     
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending...';
-    successMsg.style.display = 'none';
+    successMsgYes.style.display = 'none';
+    successMsgNo.style.display = 'none';
     errorMsg.style.display = 'none';
 
     try {
@@ -897,12 +902,21 @@ emailjs.init('6GDrBi8NCxXS8Ml9H');
         params.append(key, formData[key]);
       }
       
+      console.log('Sending params:', params.toString());
+      
       // Use no-cors mode for Google Apps Script
-      await fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: params
-      });
+      // Note: with no-cors, we can't read the response, but data IS sent
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: params
+        });
+        console.log('Fetch completed (opaque response with no-cors)');
+      } catch (fetchError) {
+        console.error('Fetch error:', fetchError);
+        throw fetchError;
+      }
 
       // With no-cors, we can't read the response, so assume success
       // The data was sent to Google Sheets
@@ -916,7 +930,13 @@ emailjs.init('6GDrBi8NCxXS8Ml9H');
         });
       }
 
-      successMsg.style.display = 'block';
+      // Show appropriate success message
+      if (isAttending) {
+        document.getElementById('rsvp-success-yes').style.display = 'block';
+      } else {
+        document.getElementById('rsvp-success-no').style.display = 'block';
+      }
+      
       form.reset();
       document.getElementById('yes-fields').style.display = 'none';
       document.getElementById('decline-fields').style.display = 'none';
